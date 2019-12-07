@@ -7,8 +7,11 @@ set(WINHIDE_SRC
 	src/util/window_list.h
 	src/util/config.c
 	src/util/config.h
+	src/util/util.h
 	src/network/network.c
-	src/network/network.h)
+	src/network/network.h
+	src/network/client.c
+	src/network/client.h)
 
 find_path(NETLIB_HEADERS netlib.h)
 find_library(NETLIB_LIBRARIES netlib)

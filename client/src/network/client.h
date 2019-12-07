@@ -16,21 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *************************************************************************/
 
-#ifndef NETWORK_H
-#define NETWORK_H
-#include <netlib.h>
-#include <Windows.h>
-#include <stdbool.h>
+#ifndef CLIENT_H
+#define CLIENT_H
 
-extern volatile BOOL network_state;
-extern volatile BOOL network_connected;
-extern volatile BOOL network_loop;
-extern ip_address network_addr;
-extern tcp_socket network_sock;
-extern netlib_socket_set network_socket_set;
-extern netlib_byte_buf *network_buf;
-
-bool network_start(void);
-
-void network_close(void);
+void client_run(void);
 #endif

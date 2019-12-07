@@ -17,6 +17,8 @@
  *************************************************************************/
 
 #include "window_list.h"
+#include "util.h"
+#include "config.h"
 #include <stdio.h>
 #include <handleapi.h>
 
@@ -50,12 +52,17 @@ inline BOOL grab_window_state(window_t *w)
             w->state = state_hidden;
             break;
         case SW_SHOWNORMAL:
+        case SW_SHOW:
+        case SW_SHOWNOACTIVATE:
+        case SW_SHOWNA:
             w->state = state_default;
             break;
         case SW_MAXIMIZE:
+        case SW_MAX:
             w->state = state_maximized;
             break;
         case SW_MINIMIZE:
+        case SW_SHOWMINIMIZED:
             w->state = state_minimized;
         }
         return TRUE;
@@ -111,15 +118,15 @@ BOOL CALLBACK enum_callback(HWND handle, LPARAM data)
     return TRUE;
 }
 
-int window_list_build(window_list_t *list)
+bool window_list_build(window_list_t *list)
 {
     list->count = 0;
     list->first = NULL;
 
 	if (list && EnumWindows(enum_callback, list)) {
-		return 1;
+		return true;
 	} else {
-		return -1;
+		return false;
 	}
 }
 
@@ -132,26 +139,26 @@ void window_list_free(window_list_t *list)
             next = curr->next;
             free(curr);
             curr = next;
+            list->count--;
         }
     }
 }
 
-window_t *window_list_find_first(window_list_t *list, 
-    const char* title, search_criteria crit)
+window_t *window_list_find_first(window_list_t *list, target_t *t)
 {
-    if (!title || !list)
+    if (!t || !t->text || !list)
         return NULL;
     window_t *curr = list->first;
 
     while (curr) {
         BOOL title = FALSE, exe = FALSE;
-        if (crit & search_exact)
-            title = strcmp(curr->title, title) == 0;
+        if (t->crit & search_exact)
+            title = strcmp(curr->title, t->text) == 0;
         else
-            title = strstr(curr->title, title);
+            title = strstr(curr->title, t->text);
 
-        if (crit & search_exe) /* Exe always fuzzy */
-            exe = strstr(curr->title, title);
+        if (t->crit & search_exe) /* Exe always fuzzy */
+            exe = strstr(curr->title, t->text);
         else
             exe = TRUE;
 

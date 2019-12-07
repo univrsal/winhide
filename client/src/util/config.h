@@ -37,10 +37,12 @@ typedef struct config_s {
     char addr[64];
     target_t *first;
     int target_count;
+    int refresh_rate;
 } config_t;
 
 extern config_t config;
 
 void config_init(void);
 
+void config_close(void);
 #endif

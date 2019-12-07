@@ -17,12 +17,16 @@
  *************************************************************************/
 
 #include <stdio.h>
+#include "network\network.h"
+#include "network\client.h"
 #include "util\config.h"
-#include "util\window_list.h"
 
 int main(int argc, char *argv[])
 {   
     config_init();
-
+    //if (network_start())
+        client_run();
+    network_close();
+    config_close();
 	return 0;
 }

@@ -20,8 +20,11 @@
 #define WINDOW_LIST_H
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include "config.h"
-#define STR_LEN     256
+#include <stdbool.h>
+
+#define STR_LEN         256
+#define WINDOW_SHOWN    0b1000
+typedef struct target_s target_t;
 
 typedef struct window_s {
 	char title[STR_LEN];
@@ -30,11 +33,11 @@ typedef struct window_s {
 	struct window_s *next;
     HWND handle;
     enum window_state {
-        state_unknown,
-        state_hidden,
-        state_default,
-        state_maximized,
-        state_minimized,
+        state_unknown       = 0b0000,
+        state_hidden        = 0b0001,
+        state_default       = 0b1010,
+        state_maximized     = 0b1011,
+        state_minimized     = 0b0100,
     } state;
 } window_t;
 
@@ -43,10 +46,9 @@ typedef struct window_list_s {
 	int count;
 } window_list_t;
 
-int window_list_build(window_list_t *list);
+bool window_list_build(window_list_t *list);
 
 void window_list_free(window_list_t *list);
 
-window_t *window_list_find_first(window_list_t *list,
-    const char* title, search_criteria crit);
+window_t *window_list_find_first(window_list_t *list, target_t *t);
 #endif
