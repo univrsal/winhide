@@ -47,15 +47,15 @@ void client_run(void)
     window_list_t current, prev;
     prev.count = 0;
     prev.first = NULL;
-    list.count = 0;
-    list.first = NULL;
+    current.count = 0;
+    current.first = NULL;
 
-    while (!network_loop) {
+    while (network_loop) {
         uint8_t window_count = 0;
         window_list_free(&current);
         network_buf->write_pos = 1; /* First byte will be the window count later */
 
-        if (!window_list_build(&list)) {
+        if (!window_list_build(&current)) {
             warn("Couldn't build Window list. Waiting %ims\n", config.refresh_rate);
             Sleep(config.refresh_rate);
             break;
@@ -92,6 +92,7 @@ void client_run(void)
                 warn("Couldn't send window data: %s\n", netlib_get_error());
             }
         }
+        window_list_copy(&current, &prev);
         Sleep(config.refresh_rate);
     }
     SetConsoleCtrlHandler(CtrlHandler, FALSE);

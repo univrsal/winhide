@@ -61,14 +61,14 @@ int config_load(json_t *j)
     size_t i;
     json_error_t e;
     bool result = true;
-
+    char *tmp = NULL;
     if (json_unpack_ex(j, &e, 0, "{si,ss,so}", CFG_PORT,
-        &config.port, CFG_IP_ADDR, &config.addr, CFG_TARGETS, &a) == 0) {
+        &config.port, CFG_IP_ADDR, &tmp, CFG_TARGETS, &a) == 0) {
+        strncpy(config.addr, tmp, 64);
         /* Unpack targets */
         int crit = 0;
         int exe = false, exact = false;
         char buf[256];
-        char *tmp;
 
         json_array_foreach(a, i, val) {
             if (json_unpack_ex(val, &e, 0, "{ss,sb,sb}", 
@@ -154,7 +154,6 @@ void config_close(void)
     target_t *current = config.first, *next;
     while (current) {
         next = current->next;
-        free(current->text);
         free(current);
         current = next;
     }

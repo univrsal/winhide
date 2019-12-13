@@ -53,6 +53,9 @@ BOOL start_connection(void)
         goto fail;
     }
 
+    network_connected = TRUE;
+    network_loop = TRUE;
+
     return TRUE;
 fail:
     netlib_free_socket_set(network_socket_set);

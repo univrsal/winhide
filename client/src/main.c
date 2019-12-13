@@ -28,5 +28,9 @@ int main(int argc, char *argv[])
         client_run();
     network_close();
     config_close();
+
+#ifdef _DEBUG
+    getchar();
+#endif
 	return 0;
 }

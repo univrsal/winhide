@@ -54,5 +54,5 @@ void window_list_copy(const window_list_t *from, window_list_t *to);
 
 void window_list_add_window(window_list_t *l, window_t *w);
 
-void window_list_find_first(window_list_t *list, target_t *t);
+window_t *window_list_find_first(window_list_t *list, target_t *t);
 #endif

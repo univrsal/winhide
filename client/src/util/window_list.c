@@ -119,7 +119,7 @@ void window_list_add_window(window_list_t *l, window_t *w)
     if (l->first) {
         window_t *old = l->first;
         l->first = w;
-        new_window->next = old;
+        w->next = old;
     } else {
         l->first = w;
     }
@@ -187,11 +187,11 @@ void window_copy(const window_t *w, window_t *t)
     t->height = w->height;
     t->x = w->x;
     t->y = w->y;
-    t->title = strncpy(t->title, w->title, STR_LEN);
-    t->executalbe = strncpy(t->executable, w->executable, STR_LEN);
+    strncpy(t->title, w->title, STR_LEN);
+    strncpy(t->executable, w->executable, STR_LEN);
 }
 
-void window_list_copy(const window_list_t *from, window_list_t *to);
+void window_list_copy(const window_list_t *from, window_list_t *to)
 {
     if (!from|| !to)
         return;
