@@ -24,7 +24,7 @@
 int main(int argc, char *argv[])
 {   
     config_init();
-    //if (network_start())
+    if (network_start())
         client_run();
     network_close();
     config_close();

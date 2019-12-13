@@ -44,13 +44,15 @@ void client_run(void)
         return;
    } 
     
-    window_list_t list;
+    window_list_t current, prev;
+    prev.count = 0;
+    prev.first = NULL;
     list.count = 0;
     list.first = NULL;
 
     while (!network_loop) {
         uint8_t window_count = 0;
-        window_list_free(&list);
+        window_list_free(&current);
         network_buf->write_pos = 1; /* First byte will be the window count later */
 
         if (!window_list_build(&list)) {
@@ -62,10 +64,22 @@ void client_run(void)
         /* See if there's any windows we're interested in */
         target_t *t = config.first;
         while (t) {
-            window_t *w = window_list_find_first(&list, t);
+            window_t *w = window_list_find_first(&current, t);
             if (w && (w->state & WINDOW_SHOWN)) {
-                debug("Found window with title %s [x: %i, y: %i, w: %i, h: %i]\n", t->text,
-                    w->x, w->y, w->width, w->height);
+                window_t *w2 = window_list_find_first(&prev, t);
+                bool send = false;
+                /* Check if this window was here before and if it's position changed */
+                if (!w2) {
+                    /* Window is new */
+                    send = true;
+                    debug("Found new window with title %s [x: %i, y: %i, w: %i, h: %i]\n", t->text,
+                        w->x, w->y, w->width, w->height);
+                } else if (compare_window(w, w2)) {
+                    /* Window dimension changed */
+                    send = true;
+                    debug("Window with title %s moved [x: %i, y: %i, w: %i, h: %i]\n", t->text,
+                        w->x, w->y, w->width, w->height);
+                }
                 write_window(w);
                 window_count++;
             }

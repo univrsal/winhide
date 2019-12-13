@@ -22,7 +22,7 @@
 #include <windows.h>
 #include <stdbool.h>
 
-#define STR_LEN         256
+#define STR_LEN         512 
 #define WINDOW_SHOWN    0b1000
 typedef struct target_s target_t;
 
@@ -50,5 +50,9 @@ bool window_list_build(window_list_t *list);
 
 void window_list_free(window_list_t *list);
 
-window_t *window_list_find_first(window_list_t *list, target_t *t);
+void window_list_copy(const window_list_t *from, window_list_t *to);
+
+void window_list_add_window(window_list_t *l, window_t *w);
+
+void window_list_find_first(window_list_t *list, target_t *t);
 #endif

@@ -114,7 +114,7 @@ void server::tick(std::vector<rect>& windows, std::mutex& m)
 
 	if (netlib_socket_ready(m_client_socket)) {
 		m.lock();
-		recieve_windows(windows);
+		receive_windows(windows);
 		m.unlock();
 	}
 }
@@ -127,7 +127,7 @@ inline int read_rect(rect *r, netlib_byte_buf *b)
 	       netlib_read_uint16(b, &r->h);
 }
 
-void server::recieve_windows(std::vector<rect> &r)
+void server::receive_windows(std::vector<rect> &r)
 {
 	m_buf->read_pos = 0;
 	uint8_t window_count = 0;

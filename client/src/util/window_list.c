@@ -21,6 +21,7 @@
 #include "config.h"
 #include <stdio.h>
 #include <handleapi.h>
+#include <string.h>
 
 inline BOOL grab_window_title(window_t *w)
 {
@@ -103,19 +104,26 @@ BOOL CALLBACK enum_callback(HWND handle, LPARAM data)
         grab_window_state(new_window) &&
         grab_window_exe(new_window))
     {    
-        if (list->first) {
-            window_t *old = list->first;
-            list->first = new_window;
-            new_window->next = old;
-        } else {
-            list->first = new_window;
-        }
-        list->count++;
+        window_list_add_window(list, new_window);
     } else {
         /* Doesn't have a title or size */
         free(new_window);
     }
     return TRUE;
+}
+
+void window_list_add_window(window_list_t *l, window_t *w)
+{
+    if (!l || !w)
+        return;
+    if (l->first) {
+        window_t *old = l->first;
+        l->first = w;
+        new_window->next = old;
+    } else {
+        l->first = w;
+    }
+    l->count++;
 }
 
 bool window_list_build(window_list_t *list)
@@ -168,4 +176,32 @@ window_t *window_list_find_first(window_list_t *list, target_t *t)
         curr = curr->next;
     }
     return NULL;
+}
+
+void window_copy(const window_t *w, window_t *t)
+{
+    t->state = w->state;
+    t->handle = w->handle;
+    t->next = NULL;
+    t->width = w->width;
+    t->height = w->height;
+    t->x = w->x;
+    t->y = w->y;
+    t->title = strncpy(t->title, w->title, STR_LEN);
+    t->executalbe = strncpy(t->executable, w->executable, STR_LEN);
+}
+
+void window_list_copy(const window_list_t *from, window_list_t *to);
+{
+    if (!from|| !to)
+        return;
+    window_list_free(to);
+
+    window_t *cur = from->first;
+    while (cur) {
+        window_t *copy = malloc(sizeof(window_t));
+        window_copy(cur, copy);
+        window_list_add_window(to, copy);
+        cur = cur->next;
+    }
 }
