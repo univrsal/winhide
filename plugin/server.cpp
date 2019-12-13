@@ -40,7 +40,8 @@ server::~server()
 void server::init()
 {
 	if (netlib_resolve_host(&m_ip, nullptr, m_ip.port) < 0) {
-		warn("Couldn't resolve local ip. Can't start network!");
+		warn("Couldn't resolve local ip. Can't start network: %s",
+		     netlib_get_error());
 	} else {
 		info("Resolved local ip %d.%d.%d.%d",
 		     ip_shift(m_ip.host));
@@ -48,13 +49,13 @@ void server::init()
 		m_buf = netlib_alloc_byte_buf(0xff);
 		m_sockets = netlib_alloc_socket_set(1);
 		if (!m_buf) {
-			warn("Couldn't allocate byte buffer!");
+			warn("Couldn't allocate byte buffer: %s", netlib_get_error());
 		} else if (!m_server_socket) {
-			warn("Couldn't open socket!");
+			warn("Couldn't open socket: %s", netlib_get_error());
 		} else if (!m_sockets) {
-			warn("Couldn't allocate socket set!");
+			warn("Couldn't allocate socket set: %s", netlib_get_error());
 		} else if (netlib_tcp_add_socket(m_sockets, m_server_socket) < 0) {
-			warn("Couldn't allocate socket set!");
+			warn("Couldn't allocate socket set: %s", netlib_get_error());
 		} else {
 			m_started = true;
 		}

@@ -39,6 +39,10 @@ namespace source {
     {
         update(settings);
         m_server = new network::server(m_port);
+        if (m_server->started())
+            infos("Successfully started server on port %i", m_port);
+        else
+            warns("Error: Couldn't start server");
     }
 
     winhide::~winhide()

@@ -35,7 +35,7 @@ class server {
 
     void init();
     bool connect_client();
-    void recieve_windows(std::vector<rect>& r);
+    void receive_windows(std::vector<rect>& r);
 public:
     server(uint16_t port);
     ~server();

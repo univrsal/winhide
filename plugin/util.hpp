@@ -30,12 +30,12 @@ struct rect {
 #define warn(format, ...) \
 	blog(LOG_WARNING, "[winhide] " format, ##__VA_ARGS__)
 
-#define debugs(format, name, ...) \
-	blog(LOG_DEBUG, "[winhide: %s] " format, name, ##__VA_ARGS__)
+#define debugs(format, ...) \
+	blog(LOG_DEBUG, "[winhide: %s] " format, obs_source_get_name(m_source), ##__VA_ARGS__)
 #define infos(format, ...) \
-	blog(LOG_INFO, "[winhide: %s] " format, name, ##__VA_ARGS__)
+	blog(LOG_INFO, "[winhide: %s] " format, obs_source_get_name(m_source), ##__VA_ARGS__)
 #define warns(format, ...) \
-	blog(LOG_WARNING, "[winhide %s] " format, name, ##__VA_ARGS__)
+	blog(LOG_WARNING, "[winhide: %s] " format, obs_source_get_name(m_source), ##__VA_ARGS__)
 
 #define ip_shift(ip) \
 	(ip >> 0) & 0xFF, (ip >> 8) & 0xFF, (ip >> 16) & 0xFF, (ip >> 25)
