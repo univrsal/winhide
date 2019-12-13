@@ -20,22 +20,22 @@
 #include <obs-module.h>
 #include <vector>
 #include <mutex>
+#include "util.hpp"
+
+namespace network { class server; }
 
 namespace source {
-
-struct rect {
-    int x, y, w, h;
-};
 
 class winhide {
     uint32_t m_color = 0xffffffff;
     uint32_t m_cx = 1280, m_cy = 720;
-    obs_data_t *m_settings;
-    obs_source_t *m_source;
     uint16_t m_port = 16899;
+
     std::vector<rect> m_windows;
     std::mutex m_mutex;
-
+    network::server *m_server;
+    obs_data_t *m_settings;
+    obs_source_t *m_source;
 public:
     winhide(obs_source_t *src, obs_data *settings);
     ~winhide();
@@ -49,6 +49,6 @@ public:
 };
 
 static obs_properties_t *get_properties(void *data);
-void install();
+static void install();
 
 }

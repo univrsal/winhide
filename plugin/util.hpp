@@ -19,6 +19,10 @@
 #pragma once
 #include <obs-module.h>
 
+struct rect {
+	uint16_t x, y, w, h;
+};
+
 #define debug(format, ...) \
 	blog(LOG_DEBUG, "[winhide] " format, ##__VA_ARGS__)
 #define info(format, ...) \

@@ -18,6 +18,10 @@
 
 #pragma once
 #include <netlib.h>
+#include <mutex>
+#include <vector>
+#include "util.hpp"
+
 namespace network {
 
 class server {
@@ -31,11 +35,12 @@ class server {
 
     void init();
     bool connect_client();
+    void recieve_windows(std::vector<rect>& r);
 public:
     server(uint16_t port);
     ~server();
 
-    void tick();
+    void tick(std::vector<rect>& windows, std::mutex& m);
     bool started() const { return m_started; }
 };
 }

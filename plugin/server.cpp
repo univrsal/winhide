@@ -79,7 +79,7 @@ bool server::connect_client()
 	return result;
 }
 
-void server::tick()
+void server::tick(std::vector<rect>& windows, std::mutex& m)
 {
 	/* Check if there's new messages in socket
 	   This might need to be moved into a thread
@@ -113,7 +113,43 @@ void server::tick()
 	}
 
 	if (netlib_socket_ready(m_client_socket)) {
-		/* Client send window info */
+		m.lock();
+		recieve_windows(windows);
+		m.unlock();
+	}
+}
+
+inline int read_rect(rect *r, netlib_byte_buf *b)
+{
+	return netlib_read_uint16(b, &r->x) &&
+	       netlib_read_uint16(b, &r->y) &&
+	       netlib_read_uint16(b, &r->w) &&
+	       netlib_read_uint16(b, &r->h);
+}
+
+void server::recieve_windows(std::vector<rect> &r)
+{
+	m_buf->read_pos = 0;
+	uint8_t window_count = 0;
+	int read = netlib_tcp_recv_buf(m_client_socket, m_buf);
+	if (read != m_buf->length) {
+		warn("Received partial message from client. Skipping data!");
+		return;
+	}
+
+	if (netlib_read_uint8(m_buf, &window_count) < 0) {
+		warn("Error reading window list size.");
+		return;
+	}
+
+	r.clear();
+	for (int i = 0; i < window_count; i++) {
+		rect tmp { 0, 0, 0, 0};
+		if (read_rect(&tmp, m_buf) < 0) {
+			warn("Error while reading window at position %i from client.");
+			break;
+		}
+		r.emplace_back(tmp);
 	}
 }
 
