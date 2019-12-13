@@ -48,7 +48,7 @@ public:
     uint32_t get_height() const { return m_cy; }
 };
 
-static obs_properties_t *get_properties(void *data);
-static void install();
+extern obs_properties_t *get_properties(void *data);
+extern void install();
 
 }

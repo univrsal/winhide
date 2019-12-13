@@ -29,8 +29,10 @@ server::server(uint16_t port)
 
 server::~server()
 {
-	if (m_server_socket)
+	if (m_server_socket) {
 		netlib_tcp_close(m_server_socket);
+		info("Closing server socket at port %i", m_ip.port);
+	}
 	if (m_server_socket)
 		netlib_free_byte_buf(m_buf);
 	if (m_sockets)
@@ -80,6 +82,15 @@ bool server::connect_client()
 	return result;
 }
 
+void server::disconnect_client()
+{
+	netlib_tcp_close(m_client_socket);
+	m_client_socket = nullptr;
+	netlib_free_socket_set(m_sockets);
+	m_sockets = netlib_alloc_socket_set(1);
+	netlib_tcp_add_socket(m_sockets, m_server_socket);
+}
+
 void server::tick(std::vector<rect>& windows, std::mutex& m)
 {
 	/* Check if there's new messages in socket
@@ -107,8 +118,7 @@ void server::tick(std::vector<rect>& windows, std::mutex& m)
 				warn("Error while opening client connection");
 			} else if (!connect_client()) {
 				warn("Adding connection to client failed");
-				netlib_free_socket_set(m_sockets);
-				m_sockets = nullptr;
+				disconnect_client();
 			}
 		}
 	}
@@ -134,7 +144,8 @@ void server::receive_windows(std::vector<rect> &r)
 	uint8_t window_count = 0;
 	int read = netlib_tcp_recv_buf(m_client_socket, m_buf);
 	if (read != m_buf->length) {
-		warn("Received partial message from client. Skipping data!");
+		warn("Received partial message from client. Disconnecting!");
+		disconnect_client();
 		return;
 	}
 

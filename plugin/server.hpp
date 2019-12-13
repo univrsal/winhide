@@ -31,10 +31,10 @@ class server {
     netlib_socket_set m_sockets = nullptr;
     netlib_byte_buf *m_buf;
     bool m_started = false;
-    int m_clients = 0;
 
     void init();
     bool connect_client();
+    void disconnect_client();
     void receive_windows(std::vector<rect>& r);
 public:
     server(uint16_t port);
