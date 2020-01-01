@@ -1,5 +1,5 @@
 # winhide
-Allows streamers to hide sensible information, specifically when doing live [scambaiting](https://en.wikipedia.org/wiki/Scam_baiting).
+Allows streamers to hide sensitive information, specifically when doing live [scambaiting](https://en.wikipedia.org/wiki/Scam_baiting).
 
 Winhide consists of two parts, an OBS Studio plugin and a client program. The client
 is intended to run inside a virtual machine and connects to the plugin running 
