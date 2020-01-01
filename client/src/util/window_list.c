@@ -116,13 +116,8 @@ void window_list_add_window(window_list_t *l, window_t *w)
 {
     if (!l || !w)
         return;
-    if (l->first) {
-        window_t *old = l->first;
-        l->first = w;
-        w->next = old;
-    } else {
-        l->first = w;
-    }
+    w->next = l->first;
+    l->first = w;
     l->count++;
 }
 
@@ -149,6 +144,8 @@ void window_list_free(window_list_t *list)
             curr = next;
             list->count--;
         }
+        list->count = 0;
+        list->first = NULL;
     }
 }
 

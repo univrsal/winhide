@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include "../util/config.h"
+#include "../util/util.h"
 #include "network.h"
 
 volatile BOOL network_state = FALSE;
@@ -28,28 +29,33 @@ tcp_socket network_sock;
 netlib_socket_set network_socket_set;
 netlib_byte_buf *network_buf = NULL;
 
-BOOL start_connection(void)
+BOOL start_connection(BOOL first_try)
 {
     if (netlib_resolve_host(&network_addr, config.addr, config.port) == -1) {
-        printf("netlib_resolve_host failed: %s\n", netlib_get_error());
-        printf("make sure obs-studio is running with a source listening\n");
+        if (first_try) {
+            warn("netlib_resolve_host failed: %s", netlib_get_error());
+            warn("make sure obs-studio is running with a source listening");
+        }
         return FALSE;
     }
 
     network_socket_set = netlib_alloc_socket_set(1);
     if (!network_socket_set) {
-        printf("netlib_alloc_socket_set failed: %s\n", netlib_get_error());
+        if (first_try)
+            warn("netlib_alloc_socket_set failed: %s", netlib_get_error());
         return FALSE;
     }
 
     network_sock = netlib_tcp_open(&network_addr);
     if (!network_sock) {
-        printf("netlib_tcp_open failed: %s\n", netlib_get_error());
+        if (first_try)
+            warn("netlib_tcp_open failed: %s", netlib_get_error());
         goto fail;
     }
 
     if (netlib_tcp_add_socket(network_socket_set, network_sock) == -1) {
-        printf("netlib_tcp_add_socket failed: %s\n", netlib_get_error());
+        if (first_try)
+            warn("netlib_tcp_add_socket failed: %s", netlib_get_error());
         goto fail;
     }
 
@@ -65,12 +71,12 @@ fail:
 BOOL init(void)
 {
     if (netlib_init() == -1) {
-        printf("netlib_init failed: %s\n", netlib_get_error());
+        warn("netlib_init failed: %s", netlib_get_error());
         return FALSE;
     }
     network_buf = netlib_alloc_byte_buf(255);
     if (!network_buf) {
-        printf("netlib_alloc_byte_buf failed: %s\n", netlib_get_error());
+        warn("netlib_alloc_byte_buf failed: %s", netlib_get_error());
         return FALSE;
     }
     network_state = TRUE;
@@ -81,11 +87,15 @@ bool network_start(void)
 {
     bool result = true;
     if (!init()) {
-        printf("Network init failed!\n");
+        warn("Network init failed!");
         result = false;
-    } else if (!start_connection()) {
-        printf("Connection failed!\n");
-        result = false;
+    } else {
+        int attempts = 0;
+        while (!start_connection(attempts == 0)) {
+            warn("Connection failed! Trying again in 1 Second");
+            attempts++;
+            Sleep(1000);
+        }
     }
     return result;
 }

@@ -39,8 +39,8 @@ BOOL WINAPI CtrlHandler(DWORD dwCtrlType)
 void client_run(void)
 {
     SetConsoleCtrlHandler(CtrlHandler, TRUE);
-    if (!network_state || network_connected) {
-        warn("Can't start client because connection to server failed.\n");
+    if (!network_state || !network_connected) {
+        warn("Can't start client because connection to server failed.");
         return;
    } 
     
@@ -51,45 +51,61 @@ void client_run(void)
     current.first = NULL;
 
     while (network_loop) {
+        bool send_windows = false;
         uint8_t window_count = 0;
         window_list_free(&current);
         network_buf->write_pos = 1; /* First byte will be the window count later */
 
         if (!window_list_build(&current)) {
-            warn("Couldn't build Window list. Waiting %ims\n", config.refresh_rate);
+            warn("Couldn't build Window list. Waiting %ims", config.refresh_rate);
             Sleep(config.refresh_rate);
-            break;
+            continue;
         }
 
         /* See if there's any windows we're interested in */
         target_t *t = config.first;
-        while (t) {
+        while (t && window_count < 32) { /* Buffer only has space for 32 windows */
             window_t *w = window_list_find_first(&current, t);
-            if (w && (w->state & WINDOW_SHOWN)) {
+            bool send_this_window = false;
+            if (w) {
                 window_t *w2 = window_list_find_first(&prev, t);
-                bool send = false;
-                /* Check if this window was here before and if it's position changed */
-                if (!w2) {
-                    /* Window is new */
-                    send = true;
-                    debug("Found new window with title %s [x: %i, y: %i, w: %i, h: %i]\n", t->text,
+
+                /* Check if this window was here before and if its position changed */
+                if (!w2 && (w->state & WINDOW_SHOWN)) {
+                    /* Window is new and visible */
+                    send_windows = true;
+                    send_this_window = true;
+                    debug("Found new window with title %s [x: %i, y: %i, w: %i, h: %i]", t->text,
                         w->x, w->y, w->width, w->height);
-                } else if (compare_window(w, w2)) {
+                } else if (w2 && compare_window(w, w2)) {
                     /* Window dimension changed */
-                    send = true;
-                    debug("Window with title %s moved [x: %i, y: %i, w: %i, h: %i]\n", t->text,
-                        w->x, w->y, w->width, w->height);
+                    if (w->state & WINDOW_SHOWN) {
+                        send_windows = true;
+                        send_this_window = true;
+                        debug("Window with title %s moved [x: %i, y: %i, w: %i, h: %i]", t->text,
+                            w->x, w->y, w->width, w->height);
+                    } else if ((w2->state & WINDOW_SHOWN) && !(w->state & WINDOW_SHOWN)) {
+                        /* Window was visible and isn't anymore,
+                         * so we force the window list to be sent,
+                         * even if it is empty. This makes sure that
+                         * Windows that are being minimized are removed
+                         * from the window list */
+                        send_windows = true;
+                    }
                 }
-                write_window(w);
-                window_count++;
+
+                if (send_this_window) {
+                    write_window(w);
+                    window_count++;
+                }
             }
             t = t->next;
         }
 
-        if (window_count > 0) {
+        if (send_windows) {
             network_buf->data[0] = window_count;
             if (netlib_tcp_send_buf(network_sock, network_buf) < 0) {
-                warn("Couldn't send window data: %s\n", netlib_get_error());
+                warn("Couldn't send window data: %s", netlib_get_error());
             }
         }
         window_list_copy(&current, &prev);

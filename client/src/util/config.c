@@ -20,7 +20,7 @@
 #include "util.h"
 #include <jansson.h>
 #include <string.h>
-#define CFG_PATH    "./winhide.json"
+#define CFG_PATH            "./winhide.json"
 
 #define CFG_PORT            "port"
 #define CFG_TARGETS         "targets"
@@ -40,7 +40,7 @@ void target_add(const char *text, search_criteria flags)
     strncpy(n->text, text, 256);
     config.first = n;
     config.target_count++;
-    info("Added target \"%s\" (Exact: %s, Exe: %s)\n", text,
+    info("Added target \"%s\" (Exact: %s, Exe: %s)", text,
         strbool(flags & search_exact), strbool(flags & search_exe));
 }
 
@@ -62,8 +62,9 @@ int config_load(json_t *j)
     json_error_t e;
     bool result = true;
     char *tmp = NULL;
-    if (json_unpack_ex(j, &e, 0, "{si,ss,so}", CFG_PORT,
-        &config.port, CFG_IP_ADDR, &tmp, CFG_TARGETS, &a) == 0) {
+    if (json_unpack_ex(j, &e, 0, "{si,si,ss,so}", CFG_PORT,
+        &config.port, CFG_REFRESH_RATE, &config.refresh_rate, CFG_IP_ADDR, &tmp, 
+        CFG_TARGETS, &a) == 0) {
         strncpy(config.addr, tmp, 64);
         /* Unpack targets */
         int crit = 0;
@@ -79,16 +80,22 @@ int config_load(json_t *j)
                 strcpy_s(buf, 256, tmp);
                 target_add(buf, crit);
             } else {
-                printf("Error unpacking config json: %s (line: %i, col: %i)\n",
+                warn("Error unpacking config json: %s (line: %i, col: %i)",
                     e.text, e.line, e.column);
             }
         }
     } else {
-        printf("Error unpacking config json: %s (line: %i, col: %i)\n",
+        warn("Error unpacking config json: %s (line: %i, col: %i)",
             e.text, e.line, e.column);
         result = false;
     }
 
+    if (result) {
+        info("Config loaded!");
+        info("Address:  %s", config.addr);
+        info("Port:     %d", config.port);
+        info("Tickrate: %dms", config.refresh_rate);
+    }
     return result;
 }
 
@@ -107,20 +114,21 @@ int config_create()
         if (t_json) {
             json_array_append_new(a, t_json);
         } else {
-            printf("Error while packing target in json: %s\n",
+            warn("Error while packing target in json: %s",
                 e.text);
             result = false;
         }
         curr = curr->next;
     }
  
-    json_t *cfg = json_pack_ex(&e, 0, "{si,ss,so}",
-        CFG_PORT, config.port, CFG_IP_ADDR, config.addr,
+    json_t *cfg = json_pack_ex(&e, 0, "{si,si,ss,so}",
+        CFG_PORT, config.port, CFG_IP_ADDR,
+        CFG_REFRESH_RATE, config.refresh_rate, config.addr,
         CFG_TARGETS, a);
     if (cfg && result) {
         json_dump_file(cfg, CFG_PATH, JSON_INDENT(4));
     } else {
-        printf("Error while packing config in json: %s\n",
+        warn("Error while packing config in json: %s",
             e.text);
         result = false;
     }
@@ -145,7 +153,7 @@ void config_init(void)
     }
 
     if (!result)
-        printf("Config loading failed! Using defaults\n");
+        warn("Config loading failed! Using defaults");
     json_decref(cfg);
 }
 
