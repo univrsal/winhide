@@ -5,7 +5,7 @@ Winhide consists of two parts, an OBS Studio plugin and a client program. The cl
 is intended to run inside a virtual machine and connects to the plugin running 
 in OBS Studio somewhere on the same network. The client will frequently check all
 open windows in the VM and compare them against a list of configurable programs
-that could contain sensible information.
+that could contain sensitive information.
 
 If any programs are found and they're not minimized, their position and size
 is sent to the plugin which will create a rectangle to blank out the window.
