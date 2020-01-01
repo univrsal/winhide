@@ -34,7 +34,6 @@ class server {
 
     void init();
     bool connect_client();
-    void disconnect_client();
     void receive_windows(std::vector<rect>& r);
 public:
     server(uint16_t port);
@@ -42,5 +41,6 @@ public:
 
     void tick(std::vector<rect>& windows, std::mutex& m);
     bool started() const { return m_started; }
+    void disconnect_client();
 };
 }

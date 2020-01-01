@@ -24,13 +24,15 @@
 #define S_WIDTH		"width"
 #define S_HEIGHT	"height"
 #define S_PORT		"port"
+#define S_DC		"disconnect"
 
 #define T_(t)		obs_module_text(t)
 #define T_ID		T_("Winhide.Source")
-#define T_COLOR		T_("WinHide.Color")
-#define T_WIDTH		T_("WinHide.Width")
-#define T_HEIGHT	T_("WinHide.Height")
-#define T_PORT		T_("WinHide.Port")
+#define T_COLOR		T_("Winhide.Color")
+#define T_WIDTH		T_("Winhide.Width")
+#define T_HEIGHT	T_("Winhide.Height")
+#define T_PORT		T_("Winhide.Port")
+#define T_DC		T_("Winhide.Disconnect")
 
 namespace source {
 
@@ -93,6 +95,18 @@ namespace source {
         m_mutex.unlock();
     }
 
+    void winhide::disconnect()
+    {
+        m_server->disconnect_client();
+        m_windows.clear();
+    }
+
+	static bool disconnect_clicked(obs_properties_t *props,
+	                   obs_property_t *property, void *data)
+	{
+		reinterpret_cast<winhide *>(data)->disconnect();
+		return false;
+	}
 
 	obs_properties_t *get_properties(void *data)
 	{
@@ -101,7 +115,8 @@ namespace source {
 		obs_properties_add_color(props, S_COLOR, T_COLOR);
 		obs_properties_add_int(props, S_WIDTH, T_WIDTH, 0, 4096, 1);
 		obs_properties_add_int(props, S_HEIGHT, T_HEIGHT, 0, 4069, 1);
-		obs_properties_add_int(props, S_PORT, T_PORT, 1024, 65000, 1);
+		obs_properties_add_int(props, S_PORT, T_PORT, 1024, 0xffff, 1);
+		obs_properties_add_button(props, S_DC, T_DC, disconnect_clicked);
 		return props;
 	}
 

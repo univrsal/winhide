@@ -46,6 +46,8 @@ public:
 
     uint32_t get_width() const { return m_cx; }
     uint32_t get_height() const { return m_cy; }
+
+    void disconnect();
 };
 
 extern obs_properties_t *get_properties(void *data);

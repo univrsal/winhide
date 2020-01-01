@@ -91,7 +91,7 @@ void server::disconnect_client()
 	netlib_tcp_add_socket(m_sockets, m_server_socket);
 }
 
-void server::tick(std::vector<rect>& windows, std::mutex& m)
+void server::tick(std::vector<rect> &windows, std::mutex &m)
 {
 	/* Check if there's new messages in socket
 	   This might need to be moved into a thread
@@ -119,6 +119,9 @@ void server::tick(std::vector<rect>& windows, std::mutex& m)
 			} else if (!connect_client()) {
 				warn("Adding connection to client failed");
 				disconnect_client();
+			} else {
+				info("Client successfully connected");
+				windows.clear();
 			}
 		}
 	}
@@ -144,8 +147,16 @@ void server::receive_windows(std::vector<rect> &r)
 	uint8_t window_count = 0;
 	int read = netlib_tcp_recv_buf(m_client_socket, m_buf);
 	if (read != m_buf->length) {
-		warn("Received partial message from client. Disconnecting!");
-		disconnect_client();
+		/*
+		   On connection the socket is marked ready,
+		   but no data is sent, so if we receive 0 bytes
+		   we assume the client just connected and not
+		   diconnect it.
+		*/
+		if (read) {
+			disconnect_client();
+			warn("Received partial message from client. Disconnecting!");
+		}
 		return;
 	}
 
