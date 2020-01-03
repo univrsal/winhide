@@ -26,13 +26,28 @@
 #define WINDOW_SHOWN 0b1000
 typedef struct target_s target_t;
 
+struct rect {
+    int w, h, x, y;
+};
+
 typedef struct window_s {
     char title[STR_LEN];
     char executable[STR_LEN];
-    int width, height, x, y;
+    /* This is set to true if there's one or more
+     * windows that have a lower z value (aka. are
+     * layered above this window) and have the same
+     * or bigger dimensions.
+     */
+    bool covered;
+    struct rect dim;
     struct window_s* next;
     HWND handle;
     enum window_state {
+        /*
+            The fourth bit is a flag,
+            which determines whether the
+            window is visible in this state
+        */
         state_unknown = 0b0000,
         state_hidden = 0b0001,
         state_default = 0b1010,

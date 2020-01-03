@@ -32,5 +32,6 @@
 
 #define strbool(b) (b ? "true" : "false")
 
-#define compare_window(a, b) (a->x != b->x || a->y != b->y || a->width != b->width || a->height != b->height)
+#define compare_window(a, b) (a->dim.x != b->dim.x || a->dim.y != b->dim.y ||\
+                              a->dim.w != b->dim.w || a->dim.h != b->dim.h)
 #endif

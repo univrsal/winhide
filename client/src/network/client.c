@@ -24,10 +24,10 @@
 
 void write_window(window_t* w)
 {
-    netlib_write_uint16(network_buf, w->x);
-    netlib_write_uint16(network_buf, w->y);
-    netlib_write_uint16(network_buf, w->width);
-    netlib_write_uint16(network_buf, w->height);
+    netlib_write_uint16(network_buf, w->dim.x);
+    netlib_write_uint16(network_buf, w->dim.y);
+    netlib_write_uint16(network_buf, w->dim.w);
+    netlib_write_uint16(network_buf, w->dim.w);
 }
 
 BOOL WINAPI CtrlHandler(DWORD dwCtrlType)
@@ -76,14 +76,14 @@ void client_run(void)
                     send_windows = true;
                     send_this_window = true;
                     debug("Found new window with title %s [x: %i, y: %i, w: %i, h: %i]", t->text,
-                        w->x, w->y, w->width, w->height);
+                        w->dim.x, w->dim.y, w->dim.w, w->dim.h);
                 } else if (w2 && compare_window(w, w2)) {
                     /* Window dimension changed */
                     if (w->state & WINDOW_SHOWN) {
                         send_windows = true;
                         send_this_window = true;
                         debug("Window with title %s moved [x: %i, y: %i, w: %i, h: %i]", t->text,
-                            w->x, w->y, w->width, w->height);
+                            w->dim.x, w->dim.y, w->dim.w, w->dim.h);
                     } else if ((w2->state & WINDOW_SHOWN) && !(w->state & WINDOW_SHOWN)) {
                         /* Window was visible and isn't anymore,
                          * so we force the window list to be sent,

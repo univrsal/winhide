@@ -31,16 +31,16 @@ inline BOOL grab_window_title(window_t* w)
 inline BOOL grab_window_dim(window_t* w)
 {
     RECT dim = { 0, 0, 0, 0 };
-    w->x = 0;
-    w->y = 0;
-    w->width = 0;
-    w->height = 0;
+    w->dim.x = 0;
+    w->dim.y = 0;
+    w->dim.w = 0;
+    w->dim.h = 0;
 
     if (GetWindowRect(w->handle, &dim)) {
-        w->width = max(dim.right - dim.left, 0);
-        w->height = max(dim.bottom - dim.top, 0);
-        w->x = dim.left;
-        w->y = dim.top;
+        w->dim.w = max(dim.right - dim.left, 0);
+        w->dim.h = max(dim.bottom - dim.top, 0);
+        w->dim.x = dim.left;
+        w->dim.y = dim.top;
         return TRUE;
     }
     return FALSE;
@@ -87,6 +87,27 @@ inline BOOL grab_window_exe(window_t* w)
     return result;
 }
 
+inline BOOL rect_is_covered(const struct rect* compare, const struct rect* with)
+{
+    return with->x <= compare->x && with->y <= compare->y &&
+        with->w >= compare->w && with->h >= compare->h;
+}
+
+BOOL window_is_covered(const window_t* w, HWND next)
+{
+    window_t tmp;
+    
+    while (next) {
+        tmp.handle = next;
+        if (grab_window_dim(&tmp)) {
+            if (rect_is_covered(&w->dim, &tmp.dim))
+                return TRUE;
+        }
+        GetNextWindow(next, GW_HWNDPREV);
+    }
+    return FALSE;
+}
+
 BOOL CALLBACK enum_callback(HWND handle, LPARAM data)
 {
     window_list_t* list = data;
@@ -98,6 +119,9 @@ BOOL CALLBACK enum_callback(HWND handle, LPARAM data)
     new_window->handle = handle;
 
     if (grab_window_title(new_window) && grab_window_dim(new_window) && grab_window_state(new_window) && grab_window_exe(new_window)) {
+        HWND next = new_window->handle;
+        GetNextWindow(next, GW_HWNDPREV);
+        new_window->covered = window_is_covered(new_window, next);
         window_list_add_window(list, new_window);
     } else {
         /* Doesn't have a title or size */
@@ -174,10 +198,10 @@ void window_copy(const window_t* w, window_t* t)
     t->state = w->state;
     t->handle = w->handle;
     t->next = NULL;
-    t->width = w->width;
-    t->height = w->height;
-    t->x = w->x;
-    t->y = w->y;
+    t->dim.w = w->dim.w;
+    t->dim.h = w->dim.h;
+    t->dim.x = w->dim.x;
+    t->dim.y = w->dim.y;
     strncpy(t->title, w->title, STR_LEN);
     strncpy(t->executable, w->executable, STR_LEN);
 }
