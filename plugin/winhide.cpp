@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *************************************************************************/
 
-#include <obs-module.h>
-#include <netlib.h>
 #include "source.hpp"
+#include <netlib.h>
+#include <obs-module.h>
 
-#define S_PLUGIN_ID			"winhide"
+#define S_PLUGIN_ID "winhide"
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE(S_PLUGIN_ID, "en-US")
@@ -32,7 +32,7 @@ bool obs_module_load()
         return false;
     } else {
         blog(LOG_INFO, "[winhide] Netlib v%d.%d.%d initialized",
-             NETLIB_MAJOR_VERSION, NETLIB_MINOR_VERSION, NETLIB_PATHLEVEL);
+            NETLIB_MAJOR_VERSION, NETLIB_MINOR_VERSION, NETLIB_PATHLEVEL);
     }
     source::install();
     return true;

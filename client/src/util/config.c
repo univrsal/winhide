@@ -20,21 +20,21 @@
 #include "util.h"
 #include <jansson.h>
 #include <string.h>
-#define CFG_PATH            "./winhide.json"
+#define CFG_PATH "./winhide.json"
 
-#define CFG_PORT            "port"
-#define CFG_TARGETS         "targets"
-#define CFG_TARGET_TEXT     "text"
-#define CFG_SEARCH_EXACT    "exact"
-#define CFG_SEARCH_EXE      "search_exe"
-#define CFG_IP_ADDR         "server_ip"
-#define CFG_REFRESH_RATE    "refresh_rate"
+#define CFG_PORT "port"
+#define CFG_TARGETS "targets"
+#define CFG_TARGET_TEXT "text"
+#define CFG_SEARCH_EXACT "exact"
+#define CFG_SEARCH_EXE "search_exe"
+#define CFG_IP_ADDR "server_ip"
+#define CFG_REFRESH_RATE "refresh_rate"
 
 config_t config;
 
-void target_add(const char *text, search_criteria flags)
+void target_add(const char* text, search_criteria flags)
 {
-    target_t *n = malloc(sizeof(target_t));
+    target_t* n = malloc(sizeof(target_t));
     n->crit = flags;
     n->next = config.first;
     strncpy(n->text, text, 256);
@@ -55,26 +55,29 @@ void init_defaults(void)
     target_add("TeamViewer", search_exact | search_exe);
 }
 
-int config_load(json_t *j)
+int config_load(json_t* j)
 {
     json_t *a = NULL, *val = NULL;
     size_t i;
     json_error_t e;
     bool result = true;
-    char *tmp = NULL;
+    char* tmp = NULL;
     if (json_unpack_ex(j, &e, 0, "{si,si,ss,so}", CFG_PORT,
-        &config.port, CFG_REFRESH_RATE, &config.refresh_rate, CFG_IP_ADDR, &tmp, 
-        CFG_TARGETS, &a) == 0) {
+            &config.port, CFG_REFRESH_RATE, &config.refresh_rate, CFG_IP_ADDR, &tmp,
+            CFG_TARGETS, &a)
+        == 0) {
         strncpy(config.addr, tmp, 64);
         /* Unpack targets */
         int crit = 0;
         int exe = false, exact = false;
         char buf[256];
 
-        json_array_foreach(a, i, val) {
-            if (json_unpack_ex(val, &e, 0, "{ss,sb,sb}", 
-                CFG_TARGET_TEXT, &tmp, CFG_SEARCH_EXACT, &exact,
-                CFG_SEARCH_EXE, &exe) == 0) {
+        json_array_foreach(a, i, val)
+        {
+            if (json_unpack_ex(val, &e, 0, "{ss,sb,sb}",
+                    CFG_TARGET_TEXT, &tmp, CFG_SEARCH_EXACT, &exact,
+                    CFG_SEARCH_EXE, &exe)
+                == 0) {
                 crit |= exact ? search_exact : search_fuzzy;
                 crit |= exe ? search_exe : 0;
                 strcpy_s(buf, 256, tmp);
@@ -103,11 +106,11 @@ int config_create()
 {
     /* Encode targets */
     json_error_t e;
-    json_t *a = json_array();
-    target_t *curr = config.first;
+    json_t* a = json_array();
+    target_t* curr = config.first;
     bool result = true;
     while (curr) {
-        json_t *t_json = json_pack_ex(&e, 0, "{ss,sb,sb}",
+        json_t* t_json = json_pack_ex(&e, 0, "{ss,sb,sb}",
             CFG_TARGET_TEXT, curr->text,
             CFG_SEARCH_EXACT, curr->crit & search_exact,
             CFG_SEARCH_EXE, curr->crit & search_exe);
@@ -120,8 +123,8 @@ int config_create()
         }
         curr = curr->next;
     }
- 
-    json_t *cfg = json_pack_ex(&e, 0, "{si,si,ss,so}",
+
+    json_t* cfg = json_pack_ex(&e, 0, "{si,si,ss,so}",
         CFG_PORT, config.port, CFG_IP_ADDR,
         CFG_REFRESH_RATE, config.refresh_rate, config.addr,
         CFG_TARGETS, a);
@@ -140,7 +143,7 @@ int config_create()
 void config_init(void)
 {
     json_error_t t;
-    json_t *cfg = json_load_file("./winhide.json", 0, &t);
+    json_t* cfg = json_load_file("./winhide.json", 0, &t);
     bool result = true;
 
     if (cfg) {

@@ -17,10 +17,10 @@
  *************************************************************************/
 
 #pragma once
-#include <netlib.h>
-#include <mutex>
-#include <vector>
 #include "util.hpp"
+#include <mutex>
+#include <netlib.h>
+#include <vector>
 
 namespace network {
 
@@ -29,12 +29,13 @@ class server {
     tcp_socket m_server_socket = nullptr;
     tcp_socket m_client_socket = nullptr;
     netlib_socket_set m_sockets = nullptr;
-    netlib_byte_buf *m_buf;
+    netlib_byte_buf* m_buf;
     bool m_started = false;
 
     void init();
     bool connect_client();
     void receive_windows(std::vector<rect>& r);
+
 public:
     server(uint16_t port);
     ~server();

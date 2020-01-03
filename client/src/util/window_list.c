@@ -17,21 +17,24 @@
  *************************************************************************/
 
 #include "window_list.h"
-#include "util.h"
 #include "config.h"
-#include <stdio.h>
+#include "util.h"
 #include <handleapi.h>
+#include <stdio.h>
 #include <string.h>
 
-inline BOOL grab_window_title(window_t *w)
+inline BOOL grab_window_title(window_t* w)
 {
     return GetWindowText(w->handle, w->title, STR_LEN) > 0;
 }
 
-inline BOOL grab_window_dim(window_t *w)
+inline BOOL grab_window_dim(window_t* w)
 {
     RECT dim = { 0, 0, 0, 0 };
-    w->x = 0; w->y = 0; w->width = 0; w->height = 0;
+    w->x = 0;
+    w->y = 0;
+    w->width = 0;
+    w->height = 0;
 
     if (GetWindowRect(w->handle, &dim)) {
         w->width = max(dim.right - dim.left, 0);
@@ -43,7 +46,7 @@ inline BOOL grab_window_dim(window_t *w)
     return FALSE;
 }
 
-inline BOOL grab_window_state(window_t *w)
+inline BOOL grab_window_state(window_t* w)
 {
     WINDOWPLACEMENT placement;
     placement.length = sizeof(WINDOWPLACEMENT);
@@ -71,7 +74,7 @@ inline BOOL grab_window_state(window_t *w)
     return FALSE;
 }
 
-inline BOOL grab_window_exe(window_t *w)
+inline BOOL grab_window_exe(window_t* w)
 {
     BOOL result = FALSE;
     DWORD proc_id = 0, length = STR_LEN;
@@ -86,24 +89,15 @@ inline BOOL grab_window_exe(window_t *w)
 
 BOOL CALLBACK enum_callback(HWND handle, LPARAM data)
 {
-	window_list_t *list = data;
-	window_t *new_window = malloc(sizeof(window_t));
+    window_list_t* list = data;
+    window_t* new_window = malloc(sizeof(window_t));
     new_window->title[0] = '\0';
     new_window->executable[0] = '\0';
     new_window->next = NULL;
     new_window->state = state_unknown;
     new_window->handle = handle;
 
-    BOOL a = grab_window_title(new_window);
-    BOOL b = grab_window_dim(new_window);
-    BOOL c = grab_window_state(new_window);
-    BOOL d = grab_window_exe(new_window);
-
-	if (grab_window_title(new_window) &&
-        grab_window_dim(new_window) &&
-        grab_window_state(new_window) &&
-        grab_window_exe(new_window))
-    {    
+    if (grab_window_title(new_window) && grab_window_dim(new_window) && grab_window_state(new_window) && grab_window_exe(new_window)) {
         window_list_add_window(list, new_window);
     } else {
         /* Doesn't have a title or size */
@@ -112,7 +106,7 @@ BOOL CALLBACK enum_callback(HWND handle, LPARAM data)
     return TRUE;
 }
 
-void window_list_add_window(window_list_t *l, window_t *w)
+void window_list_add_window(window_list_t* l, window_t* w)
 {
     if (!l || !w)
         return;
@@ -121,19 +115,19 @@ void window_list_add_window(window_list_t *l, window_t *w)
     l->count++;
 }
 
-bool window_list_build(window_list_t *list)
+bool window_list_build(window_list_t* list)
 {
     list->count = 0;
     list->first = NULL;
 
-	if (list && EnumWindows(enum_callback, list)) {
-		return true;
-	} else {
-		return false;
-	}
+    if (list && EnumWindows(enum_callback, list)) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
-void window_list_free(window_list_t *list)
+void window_list_free(window_list_t* list)
 {
     if (list) {
         window_t *curr = list->first,
@@ -149,11 +143,11 @@ void window_list_free(window_list_t *list)
     }
 }
 
-window_t *window_list_find_first(window_list_t *list, target_t *t)
+window_t* window_list_find_first(window_list_t* list, target_t* t)
 {
     if (!t || !t->text || !list)
         return NULL;
-    window_t *curr = list->first;
+    window_t* curr = list->first;
 
     while (curr) {
         BOOL title = FALSE, exe = FALSE;
@@ -175,7 +169,7 @@ window_t *window_list_find_first(window_list_t *list, target_t *t)
     return NULL;
 }
 
-void window_copy(const window_t *w, window_t *t)
+void window_copy(const window_t* w, window_t* t)
 {
     t->state = w->state;
     t->handle = w->handle;
@@ -188,15 +182,15 @@ void window_copy(const window_t *w, window_t *t)
     strncpy(t->executable, w->executable, STR_LEN);
 }
 
-void window_list_copy(const window_list_t *from, window_list_t *to)
+void window_list_copy(const window_list_t* from, window_list_t* to)
 {
-    if (!from|| !to)
+    if (!from || !to)
         return;
     window_list_free(to);
 
-    window_t *cur = from->first;
+    window_t* cur = from->first;
     while (cur) {
-        window_t *copy = malloc(sizeof(window_t));
+        window_t* copy = malloc(sizeof(window_t));
         window_copy(cur, copy);
         window_list_add_window(to, copy);
         cur = cur->next;

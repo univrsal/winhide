@@ -23,19 +23,19 @@
 typedef enum {
     search_exact = 1 << 0,
     search_fuzzy = 1 << 1,
-    search_exe   = 1 << 2
+    search_exe = 1 << 2
 } search_criteria;
 
 typedef struct target_s {
     char text[256];
     search_criteria crit;
-    struct target_s *next;
+    struct target_s* next;
 } target_t;
 
 typedef struct config_s {
     uint16_t port;
     char addr[64];
-    target_t *first;
+    target_t* first;
     int target_count;
     int refresh_rate;
 } config_t;

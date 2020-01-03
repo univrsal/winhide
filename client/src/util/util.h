@@ -19,19 +19,18 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 /* Logging */
-#define info(format, ...)       printf("[info]  " format "\n", ##__VA_ARGS__)
+#define info(format, ...) printf("[info]  " format "\n", ##__VA_ARGS__)
 #ifdef _DEBUG
-#define debug(format, ...)      printf("[debug] " format "\n", ##__VA_ARGS__)
+#define debug(format, ...) printf("[debug] " format "\n", ##__VA_ARGS__)
 #else
 #define debug(format, ...)
 #endif
-#define warn(format, ...)       printf("[warn]  " format "\n", ##__VA_ARGS__)
+#define warn(format, ...) printf("[warn]  " format "\n", ##__VA_ARGS__)
 
-#define strbool(b)              (b ? "true" : "false")
+#define strbool(b) (b ? "true" : "false")
 
-#define compare_window(a, b)    (a->x != b->x || a->y != b->y || \
-                                 a->width != b->width || a->height != b->height)
+#define compare_window(a, b) (a->x != b->x || a->y != b->y || a->width != b->width || a->height != b->height)
 #endif

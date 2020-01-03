@@ -16,13 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *************************************************************************/
 
-#include <stdio.h>
-#include "network\network.h"
 #include "network\client.h"
+#include "network\network.h"
 #include "util\config.h"
+#include <stdio.h>
 
-int main(int argc, char *argv[])
-{   
+int main(int argc, char* argv[])
+{
     config_init();
     if (network_start())
         client_run();
@@ -32,5 +32,5 @@ int main(int argc, char *argv[])
 #ifdef _DEBUG
     getchar();
 #endif
-	return 0;
+    return 0;
 }

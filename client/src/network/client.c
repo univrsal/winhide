@@ -17,12 +17,12 @@
  *************************************************************************/
 
 #include "client.h"
-#include "network.h"
+#include "../util/config.h"
 #include "../util/util.h"
 #include "../util/window_list.h"
-#include "../util/config.h"
+#include "network.h"
 
-void write_window(window_t *w)
+void write_window(window_t* w)
 {
     netlib_write_uint16(network_buf, w->x);
     netlib_write_uint16(network_buf, w->y);
@@ -42,8 +42,8 @@ void client_run(void)
     if (!network_state || !network_connected) {
         warn("Can't start client because connection to server failed.");
         return;
-   } 
-    
+    }
+
     window_list_t current, prev;
     prev.count = 0;
     prev.first = NULL;
@@ -63,12 +63,12 @@ void client_run(void)
         }
 
         /* See if there's any windows we're interested in */
-        target_t *t = config.first;
+        target_t* t = config.first;
         while (t && window_count < 32) { /* Buffer only has space for 32 windows */
-            window_t *w = window_list_find_first(&current, t);
+            window_t* w = window_list_find_first(&current, t);
             bool send_this_window = false;
             if (w) {
-                window_t *w2 = window_list_find_first(&prev, t);
+                window_t* w2 = window_list_find_first(&prev, t);
 
                 /* Check if this window was here before and if its position changed */
                 if (!w2 && (w->state & WINDOW_SHOWN)) {

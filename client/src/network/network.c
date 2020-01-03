@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *************************************************************************/
 
-#include <stdio.h>
+#include "network.h"
 #include "../util/config.h"
 #include "../util/util.h"
-#include "network.h"
+#include <stdio.h>
 
 volatile BOOL network_state = FALSE;
 volatile BOOL network_connected = FALSE;
@@ -27,7 +27,7 @@ volatile BOOL network_loop = FALSE;
 ip_address network_addr;
 tcp_socket network_sock;
 netlib_socket_set network_socket_set;
-netlib_byte_buf *network_buf = NULL;
+netlib_byte_buf* network_buf = NULL;
 
 BOOL start_connection(BOOL first_try)
 {

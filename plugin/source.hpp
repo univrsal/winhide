@@ -17,12 +17,14 @@
  *************************************************************************/
 
 #pragma once
+#include "util.hpp"
+#include <mutex>
 #include <obs-module.h>
 #include <vector>
-#include <mutex>
-#include "util.hpp"
 
-namespace network { class server; }
+namespace network {
+class server;
+}
 
 namespace source {
 
@@ -33,16 +35,17 @@ class winhide {
 
     std::vector<rect> m_windows;
     std::mutex m_mutex;
-    network::server *m_server;
-    obs_data_t *m_settings;
-    obs_source_t *m_source;
+    network::server* m_server;
+    obs_data_t* m_settings;
+    obs_source_t* m_source;
+
 public:
-    winhide(obs_source_t *src, obs_data *settings);
+    winhide(obs_source_t* src, obs_data* settings);
     ~winhide();
 
-    inline void update(obs_data_t *settings);
+    inline void update(obs_data_t* settings);
     inline void tick(float seconds);
-    inline void render(gs_effect_t *effect);
+    inline void render(gs_effect_t* effect);
 
     uint32_t get_width() const { return m_cx; }
     uint32_t get_height() const { return m_cy; }
@@ -50,7 +53,7 @@ public:
     void disconnect();
 };
 
-extern obs_properties_t *get_properties(void *data);
+extern obs_properties_t* get_properties(void* data);
 extern void install();
 
 }
